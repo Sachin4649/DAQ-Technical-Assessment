@@ -22,3 +22,4 @@ export interface VehicleData {
       return null; // Return null for invalid data
     }
   }
+  
