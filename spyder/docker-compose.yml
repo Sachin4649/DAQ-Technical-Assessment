@@ -16,7 +16,9 @@ services:
     build: ./ui
     depends_on:
       - streaming-service
+    command: npm run dev
     ports:
       - "3000:3000"
     volumes:
       - ./ui/src:/app/src:z
+      - ./ui:/app/ui

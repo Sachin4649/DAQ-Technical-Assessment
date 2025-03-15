@@ -10,6 +10,7 @@ import { Thermometer } from "lucide-react"
 import Numeric from "../components/custom/numeric"
 import RedbackLogoDarkMode from "../../public/logo-darkmode.svg"
 import RedbackLogoLightMode from "../../public/logo-lightmode.svg"
+import { toast } from "sonner"; // Import the toast function
 
 const WS_URL = "ws://localhost:8080"
 
@@ -26,8 +27,10 @@ interface VehicleData {
  */
 export default function Page(): JSX.Element {
   const { setTheme } = useTheme()
-  const [temperature, setTemperature] = useState<any>(0)
+  const [temperature, setTemperature] = useState<number>(0)
   const [connectionStatus, setConnectionStatus] = useState<string>("Disconnected")
+  const [outOfRangeTimestamps, setOutOfRangeTimestamps] = useState<number[]>([]) // Stores timestamps of out-of-range events
+
   const { lastJsonMessage, readyState }: { lastJsonMessage: VehicleData | null; readyState: ReadyState } = useWebSocket(
     WS_URL,
     {
@@ -56,17 +59,36 @@ export default function Page(): JSX.Element {
         setConnectionStatus("Disconnected")
         break
     }
-  }, [])
+  }, [readyState])
 
   /**
    * Effect hook to handle incoming WebSocket messages.
    */
   useEffect(() => {
     console.log("Received: ", lastJsonMessage)
-    if (lastJsonMessage === null) {
-      return
+    if (lastJsonMessage === null) return
+
+    const temp = lastJsonMessage.battery_temperature
+    const timestamp = Date.now() // Get current timestamp
+    setTemperature(temp)
+
+    // Check if temperature is out of range
+    if (temp > 80 || temp < 20) {
+      setOutOfRangeTimestamps((prevTimestamps) => {
+        const newTimestamps = [...prevTimestamps, timestamp] // Add new timestamp
+        const cutoffTime = timestamp - 5000 // Keep only timestamps within the last 5 seconds
+        const filteredTimestamps = newTimestamps.filter((t) => t >= cutoffTime)
+
+        // Trigger a warning if more than 3 out-of-range events occurred within 5 seconds
+        if (filteredTimestamps.length > 3) {
+          toast.error("⚠️ Battery temperature has exceeded safe limits multiple times within 5 seconds!", {
+            duration: 5000,
+          })
+        }
+
+        return filteredTimestamps // Update state with filtered timestamps
+      })
     }
-    setTemperature(lastJsonMessage.battery_temperature)
   }, [lastJsonMessage])
 
   /**

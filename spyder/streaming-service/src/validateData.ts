@@ -14,7 +14,7 @@ export interface VehicleData {
       !isNaN(data.battery_temperature)
     ) {
       return {
-        battery_temperature: data.battery_temperature,
+        battery_temperature: parseFloat(data.battery_temperature.toFixed(3)), // Ensure 3 decimal places
         timestamp: data.timestamp || Date.now(),
       };
     } else {

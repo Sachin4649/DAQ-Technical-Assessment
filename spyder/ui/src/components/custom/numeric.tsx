@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils" // Importing utility for conditional class names
+
 interface TemperatureProps {
   temp: any;
 }
@@ -17,8 +19,14 @@ function Numeric({ temp }: TemperatureProps) {
 
   // Justify your choice of implementation in brainstorming.md
 
+  const getTemperatureColor = (temp: number): string => {
+    if (temp < 20 || temp > 80) return "text-red-500"; // Unsafe
+    if (temp <= 25 || temp >= 75) return "text-yellow-500"; // Nearing unsafe
+    return "text-green-500"; // Safe
+  };
+
   return (
-    <div className="text-foreground text-4xl font-bold">
+    <div className={cn("text-foreground text-4xl font-bold", getTemperatureColor(temp))}>
       {`${temp}°C`}
     </div>
   );
