@@ -6,7 +6,7 @@ let violationHistory: { timestamp: number }[] = [];
 const MIN_SAFE_TEMP = 20;
 const MAX_SAFE_TEMP = 80;
 const TIME_WINDOW = 5000; // 5 seconds
-const MAX_VIOLATIONS = 4;
+const MAX_VIOLATIONS = 3;
 
 /**
  * Monitors battery temperature and logs an alert if out-of-range values exceed 3 times within 5 seconds.
